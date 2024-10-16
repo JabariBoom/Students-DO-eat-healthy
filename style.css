@@ -63,9 +63,3 @@ button{
     border-radius: 40px;
 }
 
-.container p{
-    color: #000000;
-    font-family: sans-serif;
-    display: flex;
-    padding-top: 30px;
-}
