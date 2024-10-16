@@ -1,65 +1,117 @@
-*{
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
-.container{
-    width: auto;
+.container {
+    width: 100%;
     min-height: 100vh;
     background: linear-gradient(150deg, #ff3c00, #15c904);
     padding: 10px;
 }
 
-.search-bar{
+.search-bar {
     width: 100%;
     max-width: 540px;
     background: white;
     margin: 100px auto 20px;
-    padding: 40px 30px 70px;
+    padding: 40px 30px 40px;
     border-radius: 10px;
 }
 
-.search-bar h1{
+.search-bar h1 {
     color: #479201;
     font-family: sans-serif;
-    display: flex;
-    align-items: center;
-    padding-left: 100px;
-    padding-top: 15px;
+    text-align: center;
     padding-bottom: 20px;
 }
 
-.search-bar img{
+.search-bar img {
+    display: block;
     width: 100px;
-    margin-left: 210px;
+    margin: 0 auto 20px;
 }
 
-.row{
+.row {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     justify-content: space-between;
+    gap: 10px;
     background: #edeef0;
     border-radius: 30px;
-    padding-left: 20px;
+    padding: 20px;
     margin-bottom: 20px;
 }
 
-input{
-    flex: 1;
+button {
+    flex: 1 1 45%;
     border: none;
     outline: none;
-    background: transparent;
-    padding: 10px;
-}
-
-button{
-    border: none;
-    outline: none;
-    padding: 16px 50px;
+    padding: 16px 20px;
     background: #a17d06;
     color: #fff;
     font-size: 16px;
     cursor: pointer;
     border-radius: 40px;
+    margin: 10px;
 }
 
+button:hover {
+    background: #c49706;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.popup-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 70%;
+    max-width: 500px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover, .close-btn:focus {
+    color: black;
+}
+
+.popup img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.popup h2 {
+    margin-top: 15px;
+    font-size: 24px;
+}
+
+.popup p {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.popup.show {
+    display: block;
+}
