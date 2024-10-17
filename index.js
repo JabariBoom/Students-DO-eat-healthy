@@ -1,6 +1,7 @@
 const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
 import config from './config/config.js';
 
+// Ensure that showFood is globally accessible for button clicks in HTML
 window.showFood = function(foodId) {
     getFoods().then(foodData => {
         const selectedFood = foodData.find(food => food.id == foodId);
@@ -15,7 +16,7 @@ function getFoods() {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-Master-Key': config.apiKey
+            'X-Master-Key': config.apiKey // Use the correct Master Key
         }
     })
     .then(response => response.json())
@@ -85,7 +86,7 @@ recipeForm.addEventListener("submit", function(event) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Master-Key': config.apiKey
+                'X-Master-Key': config.apiKey // Ensure correct Master Key
             },
             body: JSON.stringify({ Foods: updatedFoods })
         })

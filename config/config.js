@@ -1,2 +1,2 @@
-const apiKey = '$2a$10$cfl2/y5By7tGiCYiwlYmVOtxiTFmN9PAGks28UKalWEL0tlcXP0i.';
+const apiKey = '$2a$10$ZZZUod.mTm9yxtBCjfbncOnTn5ay0BcN9DsMxwOqoW29TGyon.G6S';
 export default apiKey;
