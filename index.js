@@ -2,9 +2,14 @@ const baseUrl = 'http://localhost:3000/Foods';
 
 function getFoods() {
     return fetch(baseUrl)
-        .then(response => response.json());
+        .then(function(response) {
+            return response.json();
+        })
+        .catch(function() {
+            alert('Error! Failed to connect API.');
+            return [];
+        });
 }
-
 function showFood(foodId) {
     getFoods().then(foodData => {
         const selectedFood = foodData.find(food => food.id == foodId);
