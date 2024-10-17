@@ -1,14 +1,15 @@
-const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
-import config from './config.js';
+const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';  // Ensure this is the correct bin ID
+import config from './config.js';  // Make sure your config.js contains the correct API key
 
-console.log(config.apiKey);
+console.log(config.apiKey);  // Check the key in the console
 
+// Function to get foods from the API
 function getFoods() {
     return fetch(baseUrl, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-Master-Key': config.apiKey
+            'X-Master-Key': config.apiKey  // Make sure this key is correct
         }
     })
     .then(response => response.json())
@@ -26,6 +27,7 @@ function getFoods() {
     });
 }
 
+// Function to display selected food in a popup
 function showFood(foodId) {
     getFoods().then(foodData => {
         const selectedFood = foodData.find(food => food.id == foodId);
@@ -35,6 +37,7 @@ function showFood(foodId) {
     });
 }
 
+// Function to render the popup for the selected food
 function renderFoodPopup(food) {
     const popup = document.getElementById("foodPopup");
     const popupContent = document.getElementById("popupContent");
@@ -56,12 +59,14 @@ function renderFoodPopup(food) {
     popup.classList.add("show");
 }
 
+// Function to close the popup when the close button is clicked
 const closeButton = document.querySelector(".close-btn");
 closeButton.onclick = function() {
     const popup = document.getElementById("foodPopup");
     popup.classList.remove("show");
 };
 
+// Function to handle recipe submission
 const recipeForm = document.getElementById("recipeForm");
 recipeForm.addEventListener("submit", function(event) {
     event.preventDefault();
@@ -87,7 +92,7 @@ recipeForm.addEventListener("submit", function(event) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Master-Key': config.apiKey
+                'X-Master-Key': config.apiKey  // Make sure this key is correct
             },
             body: JSON.stringify({ Foods: updatedFoods })
         })
