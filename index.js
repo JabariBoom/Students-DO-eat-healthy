@@ -1,5 +1,5 @@
 const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
-const apiKey = '$2a$10$cfl2/y5By7tGiCYiwlYmVOtxiTFmN9PAGks28UKalWEL0tlcXP0i.';
+import apiKey from './config.js';
 
 function getFoods() {
     return fetch(baseUrl, {
