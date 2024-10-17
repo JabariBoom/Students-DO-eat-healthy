@@ -18,6 +18,47 @@
     margin: 100px auto 20px;
     padding: 40px 30px 40px;
     border-radius: 10px;
+    position: relative;
+}
+
+.search-bar-top {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-bar-top input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    width: 200px;
+    margin-right: 10px;
+}
+
+.search-bar-top button {
+    background: #479201;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.search-bar-top button:hover {
+    background: #3d7d01;
+}
+
+.search-bar .row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    background: #edeef0;
+    border-radius: 30px;
+    padding: 20px;
+    margin-bottom: 20px;
 }
 
 .search-bar h1 {
@@ -56,6 +97,7 @@ button {
     border-radius: 40px;
     margin: 10px;
     position: relative;
+    display: block;
 }
 
 .recipe-button .delete-btn {
