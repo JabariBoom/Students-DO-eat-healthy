@@ -3,6 +3,16 @@ import config from './config.js';
 
 console.log(config.apiKey);
 
+// Make the showFood function globally accessible
+window.showFood = function(foodId) {
+    getFoods().then(foodData => {
+        const selectedFood = foodData.find(food => food.id == foodId);
+        if (selectedFood) {
+            renderFoodPopup(selectedFood);
+        }
+    });
+};
+
 function getFoods() {
     return fetch(baseUrl, {
         method: 'GET',
@@ -23,15 +33,6 @@ function getFoods() {
     .catch(() => {
         alert('Error! Failed to connect to API.');
         return [];
-    });
-}
-
-function showFood(foodId) {
-    getFoods().then(foodData => {
-        const selectedFood = foodData.find(food => food.id == foodId);
-        if (selectedFood) {
-            renderFoodPopup(selectedFood);
-        }
     });
 }
 
@@ -87,7 +88,7 @@ recipeForm.addEventListener("submit", function(event) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Master-Key': apiKey
+                'X-Master-Key': config.apiKey
             },
             body: JSON.stringify({ Foods: updatedFoods })
         })
