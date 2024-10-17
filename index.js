@@ -1,20 +1,21 @@
-const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
-const apiKey = '$2a$10$cfl2/y5By7tGiCYiwlYmVOtxiTFmN9PAGks28UKalWEL0tlcXP0i.';
+const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80'; // Ensure this is the correct public bin ID
+const apiKey = '$2a$10$cfl2/y5By7tGiCYiwlYmVOtxiTFmN9PAGks28UKalWEL0tlcXP0i.'; // Your master key
 
 function getFoods() {
     return fetch(baseUrl, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-Master-Key': apiKey
+            'X-Master-Key': apiKey // Master key for private bin
         }
     })
     .then(response => response.json())
     .then(foodData => {
+        console.log('foodData:', foodData); // Log to inspect the structure
         if (foodData && foodData.record && Array.isArray(foodData.record.Foods)) {
-            return foodData.record.Foods;
+            return foodData.record.Foods; // Return the Foods array if valid
         } else {
-            throw new Error("No foods found in the response");
+            throw new Error("No foods found in the response or foods data structure is incorrect");
         }
     })
     .catch(() => {
@@ -68,7 +69,7 @@ recipeForm.addEventListener("submit", function(event) {
     const imgURL = document.getElementById("imageUrl").value;
 
     const newRecipe = {
-        id: Date.now(),
+        id: Date.now(), // Generate a unique ID for each new recipe
         title: foodName,
         directions: recipeDirections,
         img_URL: imgURL,
@@ -76,6 +77,7 @@ recipeForm.addEventListener("submit", function(event) {
         "ingredients 2": ingredients[1],
         "ingredients 3": ingredients[2]
     };
+
     getFoods().then(existingFoods => {
         const updatedFoods = [...existingFoods, newRecipe];
 
@@ -85,7 +87,7 @@ recipeForm.addEventListener("submit", function(event) {
                 'Content-Type': 'application/json',
                 'X-Master-Key': apiKey
             },
-            body: JSON.stringify({ Foods: updatedFoods })
+            body: JSON.stringify({ Foods: updatedFoods }) // Update the Foods array
         })
         .then(response => {
             if (!response.ok) {
@@ -94,7 +96,7 @@ recipeForm.addEventListener("submit", function(event) {
             return response.json();
         })
         .then(() => {
-            addRecipeButton(newRecipe);
+            addRecipeButton(newRecipe); // Add the new recipe button to the UI
             updateSearchDisplay();
             searchInput.value = '';
             refreshFoodList();
@@ -103,7 +105,7 @@ recipeForm.addEventListener("submit", function(event) {
             alert('Error! Failed to submit recipe.');
         });
 
-        recipeForm.reset();
+        recipeForm.reset(); // Reset the form after submission
     });
 });
 
@@ -129,9 +131,9 @@ function addRecipeButton(recipe) {
 
 function refreshFoodList() {
     getFoods().then(foods => {
-        searchBarRow.innerHTML = '';
+        searchBarRow.innerHTML = ''; // Clear the current buttons
         foods.forEach(food => {
-            addRecipeButton(food);
+            addRecipeButton(food); // Add buttons for each food item
         });
     });
 }
