@@ -1,7 +1,6 @@
-const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';  // Ensure this is the correct bin ID
-import config from './config.js';  // Make sure your config.js contains the correct API key
-
-console.log(config.apiKey);  // Check the key in the console
+// baseUrl and apiKey declared directly in index.js
+const baseUrl = 'https://api.jsonbin.io/v3/b/67119cc6acd3cb34a898ce96'; // New base URL
+const apiKey = '$2a$10$munKfk5utPlie.KDveDg8.hr8po9RE79des8B3bwSSefKXTA052ai'; // New API key
 
 // Function to get foods from the API
 function getFoods() {
@@ -9,7 +8,7 @@ function getFoods() {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-Master-Key': config.apiKey  // Make sure this key is correct
+            'X-Master-Key': apiKey // Use new key directly
         }
     })
     .then(response => response.json())
@@ -27,152 +26,71 @@ function getFoods() {
     });
 }
 
-// Function to display selected food in a popup
-function showFood(foodId) {
-    getFoods().then(foodData => {
-        const selectedFood = foodData.find(food => food.id == foodId);
-        if (selectedFood) {
-            renderFoodPopup(selectedFood);
-        }
+// Function to add food to the API
+function addFood(food) {
+    const foodData = {
+        name: food.foodName,
+        imageUrl: food.imageUrl,
+        recipe: food.recipeDirections,
+        ingredients: food.ingredients
+    };
+
+    return fetch(baseUrl, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': apiKey
+        },
+        body: JSON.stringify({
+            Foods: foodData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Added Food:', data);
+    })
+    .catch((error) => {
+        console.error('Error adding food:', error);
     });
 }
 
-// Function to render the popup for the selected food
-function renderFoodPopup(food) {
-    const popup = document.getElementById("foodPopup");
-    const popupContent = document.getElementById("popupContent");
-
-    let ingredientsList = '';
-    for (let key in food) {
-        if (key.startsWith('ingredients') && food[key]) {
-            ingredientsList += `<li>${food[key]}</li>`;
-        }
-    }
-
-    popupContent.innerHTML = `
-        <img src="${food.img_URL}" alt="${food.title}">
-        <h2>${food.title}</h2>
-        <p>Directions: ${food.directions}</p>
-        <p>Ingredients:</p>
-        <ul>${ingredientsList}</ul>
-    `;
-    popup.classList.add("show");
-}
-
-// Function to close the popup when the close button is clicked
-const closeButton = document.querySelector(".close-btn");
-closeButton.onclick = function() {
-    const popup = document.getElementById("foodPopup");
-    popup.classList.remove("show");
-};
-
-// Function to handle recipe submission
-const recipeForm = document.getElementById("recipeForm");
-recipeForm.addEventListener("submit", function(event) {
+// Submission event listener
+document.getElementById('recipeForm').addEventListener('submit', function(event) {
     event.preventDefault();
-    const foodName = document.getElementById("foodName").value;
-    const recipeDirections = document.getElementById("recipeDirections").value;
-    const ingredients = document.getElementById("ingredients").value.split(',');
-    const imgURL = document.getElementById("imageUrl").value;
 
-    const newRecipe = {
-        id: Date.now(),
-        title: foodName,
-        directions: recipeDirections,
-        img_URL: imgURL,
-        "ingredients 1": ingredients[0],
-        "ingredients 2": ingredients[1],
-        "ingredients 3": ingredients[2]
-    };
+    const foodName = document.getElementById('foodName').value;
+    const recipeDirections = document.getElementById('recipeDirections').value;
+    const ingredients = document.getElementById('ingredients').value;
+    const imageUrl = document.getElementById('imageUrl').value || 'default-image-url.jpg';
 
-    getFoods().then(existingFoods => {
-        const updatedFoods = [...existingFoods, newRecipe];
-
-        fetch(baseUrl, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': config.apiKey  // Make sure this key is correct
-            },
-            body: JSON.stringify({ Foods: updatedFoods })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(() => {
-            addRecipeButton(newRecipe);
-            updateSearchDisplay();
-            searchInput.value = '';
-            refreshFoodList();
-        })
-        .catch(() => {
-            alert('Error! Failed to submit recipe.');
-        });
-
-        recipeForm.reset();
+    addFood({
+        foodName,
+        recipeDirections,
+        ingredients,
+        imageUrl
     });
+
+    this.reset();
 });
 
-function addRecipeButton(recipe) {
-    const newButton = document.createElement("button");
-    newButton.innerHTML = `
-        ${recipe.title} 
-        <span class="delete-btn">X</span>
-    `;
-    newButton.onclick = function() {
-        showFood(recipe.id);
-    };
-    newButton.classList.add("recipe-button");
-
-    const deleteBtn = newButton.querySelector(".delete-btn");
-    deleteBtn.onclick = function(event) {
-        event.stopPropagation();
-        searchBarRow.removeChild(newButton);
-    };
-
-    searchBarRow.appendChild(newButton);
-}
-
-function refreshFoodList() {
+// Function to display selected food in a popup
+function showFood(id) {
     getFoods().then(foods => {
-        searchBarRow.innerHTML = '';
-        foods.forEach(food => {
-            addRecipeButton(food);
-        });
-    });
-}
+        const food = foods.find(f => f.id === id);
+        if (food) {
+            const popupContent = `
+                <h2>${food.name}</h2>
+                <p>${food.recipe}</p>
+                <p><strong>Ingredients:</strong> ${food.ingredients}</p>
+                <img src="${food.imageUrl}" alt="${food.name}">
+            `;
+            const popup = document.getElementById('foodPopup');
+            document.getElementById('popupContent').innerHTML = popupContent;
+            popup.classList.add('show');
 
-function updateSearchDisplay() {
-    const searchTerm = searchInput.value.trim().toLowerCase();
-    const buttons = document.querySelectorAll('.row button');
-
-    buttons.forEach(button => {
-        const buttonText = button.innerText.toLowerCase();
-        if (buttonText.includes(searchTerm)) {
-            button.style.display = 'block';
-        } else {
-            button.style.display = 'none';
+            document.querySelector('.close-btn').addEventListener('click', () => {
+                popup.classList.remove('show');
+            });
         }
     });
 }
-
-const searchInput = document.getElementById('foodSearch');
-const searchBtn = document.getElementById('searchBtn');
-const searchBarRow = document.querySelector(".row");
-
-searchBtn.addEventListener('click', function() {
-    const searchTerm = searchInput.value.trim().toLowerCase();
-    const buttons = document.querySelectorAll('.row button');
-
-    buttons.forEach(button => {
-        const buttonText = button.innerText.toLowerCase();
-        if (buttonText.includes(searchTerm)) {
-            button.style.display = 'block';
-        } else {
-            button.style.display = 'none';
-        }
-    });
-});
