@@ -1,12 +1,14 @@
 const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
-import apiKey from './config.js';
+import config from './config.js';
+
+console.log(config.apiKey);
 
 function getFoods() {
     return fetch(baseUrl, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-Master-Key': apiKey
+            'X-Master-Key': config.apiKey
         }
     })
     .then(response => response.json())
@@ -39,7 +41,7 @@ function renderFoodPopup(food) {
 
     let ingredientsList = '';
     for (let key in food) {
-        if (key.startsWith('ingredients')) {
+        if (key.startsWith('ingredients') && food[key]) {
             ingredientsList += `<li>${food[key]}</li>`;
         }
     }
