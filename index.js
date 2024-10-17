@@ -1,15 +1,22 @@
-const baseUrl = 'https://api.jsonbin.io/v3/b/67111d1facd3cb34a8989ec4';
-const apiKey = '$2a$10$9f5zLXyC4FCiT8KwPMy83O0Jh3FnfU6Q4Pe8D.knlVqFCqqBx3ca2';
+const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
+const apiKey = '$2a$10$cfl2/y5By7tGiCYiwlYmVOtxiTFmN9PAGks28UKalWEL0tlcXP0i.';
 
 function getFoods() {
     return fetch(baseUrl, {
-        method: 'GET',  // Changed to GET to fetch existing data
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-Master-Key': apiKey  // You might consider using X-Access-Key instead
+            'X-Master-Key': apiKey
         }
     })
     .then(response => response.json())
+    .then(foodData => {
+        if (foodData && foodData.record && Array.isArray(foodData.record.Foods)) {
+            return foodData.record.Foods;
+        } else {
+            throw new Error("No foods found in the response");
+        }
+    })
     .catch(() => {
         alert('Error! Failed to connect to API.');
         return [];
@@ -59,7 +66,9 @@ recipeForm.addEventListener("submit", function(event) {
     const recipeDirections = document.getElementById("recipeDirections").value;
     const ingredients = document.getElementById("ingredients").value.split(',');
     const imgURL = document.getElementById("imageUrl").value;
+
     const newRecipe = {
+        id: Date.now(),
         title: foodName,
         directions: recipeDirections,
         img_URL: imgURL,
@@ -67,27 +76,35 @@ recipeForm.addEventListener("submit", function(event) {
         "ingredients 2": ingredients[1],
         "ingredients 3": ingredients[2]
     };
+    getFoods().then(existingFoods => {
+        const updatedFoods = [...existingFoods, newRecipe];
 
-    fetch(baseUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': apiKey
-        },
-        body: JSON.stringify(newRecipe)
-    })
-    .then(response => response.json())
-    .then(addedRecipe => {
-        addRecipeButton(addedRecipe);
-        updateSearchDisplay();
-        searchInput.value = '';
-        refreshFoodList();  // Refresh the list of foods after adding
-    })
-    .catch(() => {
-        alert('Error! Failed to submit recipe.');
+        fetch(baseUrl, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': apiKey
+            },
+            body: JSON.stringify({ Foods: updatedFoods })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(() => {
+            addRecipeButton(newRecipe);
+            updateSearchDisplay();
+            searchInput.value = '';
+            refreshFoodList();
+        })
+        .catch(() => {
+            alert('Error! Failed to submit recipe.');
+        });
+
+        recipeForm.reset();
     });
-
-    recipeForm.reset();
 });
 
 function addRecipeButton(recipe) {
@@ -112,7 +129,7 @@ function addRecipeButton(recipe) {
 
 function refreshFoodList() {
     getFoods().then(foods => {
-        searchBarRow.innerHTML = '';  // Clear previous buttons
+        searchBarRow.innerHTML = '';
         foods.forEach(food => {
             addRecipeButton(food);
         });
