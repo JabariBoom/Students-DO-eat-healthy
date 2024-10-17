@@ -1,5 +1,5 @@
 const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
-import config from './config.js';
+import config from './config/config.js';
 
 console.log(config.apiKey);
 
