@@ -1,22 +1,14 @@
 const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
-import config from './config/config.js';
+import config from './config.js';
 
-// Ensure that showFood is globally accessible for button clicks in HTML
-window.showFood = function(foodId) {
-    getFoods().then(foodData => {
-        const selectedFood = foodData.find(food => food.id == foodId);
-        if (selectedFood) {
-            renderFoodPopup(selectedFood);
-        }
-    });
-};
+console.log(config.apiKey);
 
 function getFoods() {
     return fetch(baseUrl, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-Master-Key': config.apiKey // Use the correct Master Key
+            'X-Master-Key': config.apiKey
         }
     })
     .then(response => response.json())
@@ -31,6 +23,15 @@ function getFoods() {
     .catch(() => {
         alert('Error! Failed to connect to API.');
         return [];
+    });
+}
+
+function showFood(foodId) {
+    getFoods().then(foodData => {
+        const selectedFood = foodData.find(food => food.id == foodId);
+        if (selectedFood) {
+            renderFoodPopup(selectedFood);
+        }
     });
 }
 
@@ -86,7 +87,7 @@ recipeForm.addEventListener("submit", function(event) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Master-Key': config.apiKey // Ensure correct Master Key
+                'X-Master-Key': config.apiKey
             },
             body: JSON.stringify({ Foods: updatedFoods })
         })

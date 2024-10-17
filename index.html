@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Students DO Eat Healthy!</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <div class="container">
         <div class="search-bar">
-            <img src="images/food icon.png" alt="food icon">
+            <img src="./images/food icon.png" alt="food icon">
             <h1>What will it be today?</h1>
             <div class="search-bar-top">
                 <input type="text" id="foodSearch" placeholder="Search...">
@@ -17,11 +17,11 @@
             </div>
 
             <div class="row">
-                <button id="button1">Yogurt</button>
-                <button id="button2">Smoothie</button>
-                <button id="button3">Masala</button>
-                <button id="button4">Cheese</button>
-                <button id="button5">Tomato and Pepper</button>
+                <button onclick="showFood(1)">Yogurt</button>
+                <button onclick="showFood(2)">Smoothie</button>
+                <button onclick="showFood(3)">Masala</button>
+                <button onclick="showFood(4)">Cheese</button>
+                <button onclick="showFood(5)">Tomato and Pepper</button>
             </div>
         </div>
         <div class="search-bar-form">
@@ -42,6 +42,6 @@
         </div>
     </div>
 
-    <script type="module" src="index.js"></script>
+    <script type="module" src="./index.js"></script>
 </body>
 </html>
