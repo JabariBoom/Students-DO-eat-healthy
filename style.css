@@ -55,10 +55,83 @@ button {
     cursor: pointer;
     border-radius: 40px;
     margin: 10px;
+    position: relative;
+}
+
+.recipe-button .delete-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background-color: #ff0000;
+    color: #fff;
+    font-weight: bold;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+}
+
+.recipe-button .delete-btn:hover {
+    background-color: #800a0a;
 }
 
 button:hover {
     background: #c49706;
+}
+
+.search-bar-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar-form h2 {
+    color: #479201;
+    margin-bottom: 15px;
+    font-family: sans-serif;
+}
+
+.search-bar-form input,
+.search-bar-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-family: sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
+    resize: none;
+}
+
+.search-bar-form button {
+    padding: 10px 20px;
+    background-color: #a17d06;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
+.search-bar-form button:hover {
+    background-color: #c49706;
 }
 
 .popup {
