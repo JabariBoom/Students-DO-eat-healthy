@@ -1,9 +1,6 @@
 const baseUrl = 'https://api.jsonbin.io/v3/b/67113b1facd3cb34a898aa80';
 import config from './config/config.js';
 
-console.log(config.apiKey);
-
-// Make the showFood function globally accessible
 window.showFood = function(foodId) {
     getFoods().then(foodData => {
         const selectedFood = foodData.find(food => food.id == foodId);
