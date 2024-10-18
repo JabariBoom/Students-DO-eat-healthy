@@ -1,105 +1,106 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const baseUrl = 'https://api.jsonbin.io/v3/b/67119cc6acd3cb34a898ce96';  // New base URL
-    const apiKey = '$2a$10$munKfk5utPlie.KDveDg8.hr8po9RE79des8B3bwSSefKXTA052ai';  // New API key
+const baseURL = 'https://api.jsonbin.io/v3/b/67119cc6acd3cb34a898ce96';
+const apiKey = '$2a$10$munKfk5utPlie.KDveDg8.hr8po9RE79des8B3bwSSefKXTA052ai';
 
-    // Function to get foods from the API
-    function getFoods() {
-        return fetch(baseUrl, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': apiKey // Use new key directly
-            }
-        })
-        .then(response => response.json())
-        .then(foodData => {
-            console.log('foodData:', foodData);
-            if (foodData && foodData.record && Array.isArray(foodData.record.Foods)) {
-                return foodData.record.Foods;
-            } else {
-                throw new Error("No foods found in the response or foods data structure is incorrect");
-            }
-        })
-        .catch(() => {
-            alert('Error! Failed to connect to API.');
-            return [];
+// Get references to form elements and the list where foods will be displayed
+const foodForm = document.getElementById('recipeForm');
+const foodNameInput = document.getElementById('foodName');
+const recipeDirectionsInput = document.getElementById('recipeDirections');
+const ingredientsInput = document.getElementById('ingredients');
+const imageUrlInput = document.getElementById('imageUrl');
+const foodSearch = document.getElementById('foodSearch');
+const foodPopup = document.getElementById('foodPopup');
+const popupContent = document.getElementById('popupContent');
+const closeBtn = document.querySelector('.close-btn');
+
+// Function to fetch food items from JSONBin
+function fetchFoods() {
+    fetch(baseURL, {
+        method: 'GET',
+        headers: {
+            'X-Master-Key': apiKey
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayFoods(data.record);
+    })
+    .catch(error => console.error('Error fetching food items:', error));
+}
+
+// Function to display food items in the list
+function displayFoods(foods) {
+    const foodList = document.getElementById('foodList');
+    foodList.innerHTML = '';
+    foods.forEach(food => {
+        const foodItem = document.createElement('li');
+        foodItem.textContent = `${food.name} - ${food.type} - $${food.price} - ${food.description}`;
+        foodItem.addEventListener('click', function () {
+            showFoodPopup(food);
         });
-    }
-
-    // Function to add food to the API
-    function addFood(food) {
-        const foodData = {
-            name: food.foodName,
-            imageUrl: food.imageUrl,
-            recipe: food.recipeDirections,
-            ingredients: food.ingredients
-        };
-
-        return fetch(baseUrl, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': apiKey
-            },
-            body: JSON.stringify({
-                Foods: foodData
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Added Food:', data);
-        })
-        .catch((error) => {
-            console.error('Error adding food:', error);
-        });
-    }
-
-    // Submission event listener
-    document.getElementById('recipeForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const foodName = document.getElementById('foodName').value;
-        const recipeDirections = document.getElementById('recipeDirections').value;
-        const ingredients = document.getElementById('ingredients').value;
-        const imageUrl = document.getElementById('imageUrl').value || 'default-image-url.jpg';
-
-        addFood({
-            foodName,
-            recipeDirections,
-            ingredients,
-            imageUrl
-        });
-
-        this.reset();
+        foodList.appendChild(foodItem);
     });
+}
 
-    // Function to display selected food in a popup
-    function showFood(id) {
-        getFoods().then(foods => {
-            const food = foods.find(f => f.id === id);
-            if (food) {
-                const popupContent = `
-                    <h2>${food.name}</h2>
-                    <p>${food.recipe}</p>
-                    <p><strong>Ingredients:</strong> ${food.ingredients}</p>
-                    <img src="${food.imageUrl}" alt="${food.name}">
-                `;
-                const popup = document.getElementById('foodPopup');
-                document.getElementById('popupContent').innerHTML = popupContent;
-                popup.classList.add('show');
+// Function to display the popup with food details
+function showFoodPopup(food) {
+    popupContent.innerHTML = `
+        <h2>${food.name}</h2>
+        <p>Type: ${food.type}</p>
+        <p>Price: $${food.price}</p>
+        <p>Description: ${food.description}</p>
+        ${food.imageUrl ? `<img src="${food.imageUrl}" alt="${food.name}" />` : ''}
+    `;
+    foodPopup.classList.add('show');
+}
 
-                document.querySelector('.close-btn').addEventListener('click', () => {
-                    popup.classList.remove('show');
-                });
-            }
-        });
-    }
-
-    // Set up onclick events for the default food buttons
-    const foodButtons = document.querySelectorAll('.row button');
-    foodButtons.forEach(button => {
-        const foodId = button.getAttribute('onclick').match(/\d+/)[0];  // Extract the food ID from the onclick attribute
-        button.addEventListener('click', () => showFood(foodId));
-    });
-
+// Close the popup when the close button is clicked
+closeBtn.addEventListener('click', function () {
+    foodPopup.classList.remove('show');
 });
+
+// Handle form submission
+foodForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const newRecipe = {
+        name: foodNameInput.value,
+        directions: recipeDirectionsInput.value,
+        ingredients: ingredientsInput.value.split(','),
+        imageUrl: imageUrlInput.value
+    };
+
+    fetch(baseURL, {
+        method: 'PATCH',
+        headers: {
+            'X-Master-Key': apiKey,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            record: [...newRecipe]
+        })
+    })
+    .then(response => response.json())
+    .then(() => {
+        fetchFoods();
+        foodForm.reset();  // Reset the form after submission
+    })
+    .catch(error => console.error('Error submitting food item:', error));
+});
+
+// Search functionality for food items
+foodSearch.addEventListener('input', function () {
+    const searchTerm = foodSearch.value.toLowerCase();
+    const foodItems = document.getElementById('foodList').getElementsByTagName('li');
+
+    Array.from(foodItems).forEach(item => {
+        const foodText = item.textContent.toLowerCase();
+        if (foodText.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+// Initialize food list on page load
+fetchFoods();
