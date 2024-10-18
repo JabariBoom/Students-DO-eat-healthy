@@ -15,12 +15,13 @@ function fetchDefaultButtons() {
     .then(response => response.json())
     .then(data => {
         console.log('API response data:', data);
-        const foodItems = data.record;
+        // Check if record is an object and try to access the food items
+        const foodItems = Array.isArray(data.record) ? data.record : Object.values(data.record); 
         
         if (Array.isArray(foodItems)) {
             displayFoodButtons(foodItems); // Display the buttons for existing food items
         } else {
-            console.error('data.record is not an array:', data.record);
+            console.error('data.record is not an array or valid object:', data.record);
         }
     })
     .catch(error => console.error('Error fetching data:', error));
@@ -83,8 +84,8 @@ document.getElementById('recipeForm').addEventListener('submit', function (e) {
     })
     .then(response => response.json())
     .then(data => {
-        const foodItems = data.record;
-
+        const foodItems = Array.isArray(data.record) ? data.record : Object.values(data.record);
+        
         if (Array.isArray(foodItems)) {
             const updatedFoodItems = [...foodItems, newFood]; // Add the new item to the existing data
 
@@ -101,7 +102,12 @@ document.getElementById('recipeForm').addEventListener('submit', function (e) {
             console.error('data.record is not an array:', data.record);
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error('Failed to update JSONBin.');
+    })
     .then(() => {
         fetchDefaultButtons(); // Refresh the displayed buttons
         document.getElementById('recipeForm').reset(); // Clear the form
