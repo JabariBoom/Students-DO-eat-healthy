@@ -89,6 +89,22 @@ button {
     display: block;
 }
 
+/* Style for newly added buttons */
+.recipe-button {
+    flex: 1 1 45%;
+    border: none;
+    outline: none;
+    padding: 16px 20px;
+    background: #a17d06;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 40px;
+    margin: 10px;
+    position: relative;
+    display: block;
+}
+
 .recipe-button .delete-btn {
     position: absolute;
     top: 50%;

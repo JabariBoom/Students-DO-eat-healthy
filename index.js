@@ -135,3 +135,13 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
         alert('Error occurred while submitting the form.');
     }
 });
+
+function deleteFood(foodId) {
+    let buttonsContainer = document.querySelector('.row');
+    let buttonToDelete = document.querySelector(`button[data-id="${foodId}"]`);
+
+    if (buttonToDelete) {
+        buttonToDelete.remove();
+        alert(`Deleted food with ID: ${foodId}`);
+    }
+}
