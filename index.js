@@ -1,152 +1,101 @@
 const baseURL = 'https://api.jsonbin.io/v3/b/67119cc6acd3cb34a898ce96';
 const apiKey = '$2a$10$munKfk5utPlie.KDveDg8.hr8po9RE79des8B3bwSSefKXTA052ai';
 
-function getFoods() {
-    return fetch(baseUrl, {
-        method: 'GET',  // Changed to GET to fetch existing data
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': apiKey  // You might consider using X-Access-Key instead
-        }
-    })
-    .then(response => response.json())
-    .catch(() => {
-        alert('Error! Failed to connect to API.');
-        return [];
-    });
-}
-
-function showFood(foodId) {
-    getFoods().then(foodData => {
-        const selectedFood = foodData.find(food => food.id == foodId);
-        if (selectedFood) {
-            renderFoodPopup(selectedFood);
-        }
-    });
-}
-
-function renderFoodPopup(food) {
-    const popup = document.getElementById("foodPopup");
-    const popupContent = document.getElementById("popupContent");
-
-    let ingredientsList = '';
-    for (let key in food) {
-        if (key.startsWith('ingredients')) {
-            ingredientsList += `<li>${food[key]}</li>`;
-        }
-    }
-
-    popupContent.innerHTML = `
-        <img src="${food.img_URL}" alt="${food.title}">
-        <h2>${food.title}</h2>
-        <p>Directions: ${food.directions}</p>
-        <p>Ingredients:</p>
-        <ul>${ingredientsList}</ul>
-    `;
-    popup.classList.add("show");
-}
-
-const closeButton = document.querySelector(".close-btn");
-closeButton.onclick = function() {
-    const popup = document.getElementById("foodPopup");
-    popup.classList.remove("show");
-};
-
-const recipeForm = document.getElementById("recipeForm");
-recipeForm.addEventListener("submit", function(event) {
-    event.preventDefault();
-    const foodName = document.getElementById("foodName").value;
-    const recipeDirections = document.getElementById("recipeDirections").value;
-    const ingredients = document.getElementById("ingredients").value.split(',');
-    const imgURL = document.getElementById("imageUrl").value;
-    const newRecipe = {
-        title: foodName,
-        directions: recipeDirections,
-        img_URL: imgURL,
-        "ingredients 1": ingredients[0],
-        "ingredients 2": ingredients[1],
-        "ingredients 3": ingredients[2]
-    };
-
-    fetch(baseUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': apiKey
-        },
-        body: JSON.stringify(newRecipe)
-    })
-    .then(response => response.json())
-    .then(addedRecipe => {
-        addRecipeButton(addedRecipe);
-        updateSearchDisplay();
-        searchInput.value = '';
-        refreshFoodList();  // Refresh the list of foods after adding
-    })
-    .catch(() => {
-        alert('Error! Failed to submit recipe.');
-    });
-
-    recipeForm.reset();
+document.addEventListener("DOMContentLoaded", () => {
+    fetchDefaultButtons();
 });
 
-function addRecipeButton(recipe) {
-    const newButton = document.createElement("button");
-    newButton.innerHTML = `
-        ${recipe.title} 
-        <span class="delete-btn">X</span>
-    `;
-    newButton.onclick = function() {
-        showFood(recipe.id);
-    };
-    newButton.classList.add("recipe-button");
-
-    const deleteBtn = newButton.querySelector(".delete-btn");
-    deleteBtn.onclick = function(event) {
-        event.stopPropagation();
-        searchBarRow.removeChild(newButton);
-    };
-
-    searchBarRow.appendChild(newButton);
+// Fetch default buttons from JSON and display them
+function fetchDefaultButtons() {
+    fetch(baseURL, {
+        headers: {
+            'X-Master-Key': apiKey
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const foodItems = data.record;
+        displayFoodButtons(foodItems);
+    })
+    .catch(error => console.error('Error fetching data:', error));
 }
 
-function refreshFoodList() {
-    getFoods().then(foods => {
-        searchBarRow.innerHTML = '';  // Clear previous buttons
-        foods.forEach(food => {
-            addRecipeButton(food);
+// Display food buttons dynamically
+function displayFoodButtons(foodItems) {
+    const defaultButtonsDiv = document.getElementById('default-buttons');
+    defaultButtonsDiv.innerHTML = ''; // Clear existing buttons
+
+    foodItems.forEach(food => {
+        const button = document.createElement('button');
+        button.textContent = food.title;
+        button.onclick = () => showFoodPopup(food);
+        defaultButtonsDiv.appendChild(button);
+    });
+}
+
+// Show popup with food details
+function showFoodPopup(food) {
+    const popup = document.getElementById('foodPopup');
+    const popupContent = document.getElementById('popupContent');
+    
+    let content = `<h3>${food.title}</h3>`;
+    content += `<p><strong>Directions:</strong> ${food.directions}</p>`;
+    content += `<p><strong>Ingredients:</strong></p><ul>`;
+    
+    Object.keys(food).forEach(key => {
+        if (key.startsWith('ingredients')) {
+            content += `<li>${food[key]}</li>`;
+        }
+    });
+
+    content += `</ul><img src="${food.img_URL}" alt="${food.title} image">`;
+
+    popupContent.innerHTML = content;
+    popup.style.display = 'block';
+
+    // Close the popup when clicking the close button
+    document.querySelector('.close-btn').onclick = () => {
+        popup.style.display = 'none';
+    };
+}
+
+// Form submission handler to add a new food item
+document.getElementById('recipeForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const newFood = {
+        title: document.getElementById('foodName').value,
+        directions: document.getElementById('recipeDirections').value,
+        'ingredients 1': document.getElementById('ingredients').value.split(',')[0],
+        'ingredients 2': document.getElementById('ingredients').value.split(',')[1],
+        'ingredients 3': document.getElementById('ingredients').value.split(',')[2],
+        img_URL: document.getElementById('imageUrl').value
+    };
+
+    fetch(baseURL, {
+        headers: {
+            'X-Master-Key': apiKey
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const updatedFoodItems = [...data.record, newFood]; // Add new item to the existing data
+        
+        // Update JSONBin with the new food list
+        return fetch(baseURL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': apiKey
+            },
+            body: JSON.stringify(updatedFoodItems)
         });
-    });
-}
-
-function updateSearchDisplay() {
-    const searchTerm = searchInput.value.trim().toLowerCase();
-    const buttons = document.querySelectorAll('.row button');
-
-    buttons.forEach(button => {
-        const buttonText = button.innerText.toLowerCase();
-        if (buttonText.includes(searchTerm)) {
-            button.style.display = 'block';
-        } else {
-            button.style.display = 'none';
-        }
-    });
-}
-
-const searchInput = document.getElementById('foodSearch');
-const searchBtn = document.getElementById('searchBtn');
-const searchBarRow = document.querySelector(".row");
-
-searchBtn.addEventListener('click', function() {
-    const searchTerm = searchInput.value.trim().toLowerCase();
-    const buttons = document.querySelectorAll('.row button');
-
-    buttons.forEach(button => {
-        const buttonText = button.innerText.toLowerCase();
-        if (buttonText.includes(searchTerm)) {
-            button.style.display = 'block';
-        } else {
-            button.style.display = 'none';
-        }
-    });
+    })
+    .then(response => response.json())
+    .then(() => {
+        // Update the displayed buttons with the new food item
+        fetchDefaultButtons();
+        document.getElementById('recipeForm').reset();
+    })
+    .catch(error => console.error('Error adding new food:', error));
 });
