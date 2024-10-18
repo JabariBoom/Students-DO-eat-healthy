@@ -1,116 +1,101 @@
-const baseURL = 'https://api.jsonbin.io/v3/b/67119cc6acd3cb34a898ce96';
-const apiKey = '$2a$10$munKfk5utPlie.KDveDg8.hr8po9RE79des8B3bwSSefKXTA052ai';
+const baseUrl = 'https://api.jsonbin.io/v3/b/67119cc6acd3cb34a898ce96';
+import apiKey from './config.js';
 
-document.addEventListener("DOMContentLoaded", () => {
-    fetchDefaultButtons();
-});
-
-// Fetch default buttons from JSON and display them
-function fetchDefaultButtons() {
-    fetch(baseURL, {
+function getFoods() {
+    return fetch(baseUrl, {
+        method: 'GET',
         headers: {
+            'Content-Type': 'application/json',
             'X-Master-Key': apiKey
         }
     })
     .then(response => response.json())
-    .then(data => {
-        console.log('API response data:', data);
-        // Check if record is an object and try to access the food items
-        const foodItems = Array.isArray(data.record) ? data.record : Object.values(data.record); 
-        
-        if (Array.isArray(foodItems)) {
-            displayFoodButtons(foodItems); // Display the buttons for existing food items
+    .then(foodData => {
+        console.log('foodData:', foodData);
+        if (foodData && foodData.record && Array.isArray(foodData.record.Foods)) {
+            return foodData.record.Foods;
         } else {
-            console.error('data.record is not an array or valid object:', data.record);
+            throw new Error("No foods found in the response or foods data structure is incorrect");
         }
     })
-    .catch(error => console.error('Error fetching data:', error));
-}
-
-// Display food buttons dynamically
-function displayFoodButtons(foodItems) {
-    const defaultButtonsDiv = document.getElementById('default-buttons');
-    defaultButtonsDiv.innerHTML = ''; // Clear existing buttons
-
-    foodItems.forEach(food => {
-        const button = document.createElement('button');
-        button.textContent = food.title;
-        button.onclick = () => showFoodPopup(food); // Display popup on click
-        defaultButtonsDiv.appendChild(button);
+    .catch(() => {
+        alert('Error! Failed to connect to API.');
+        return [];
     });
 }
 
-// Show popup with food details
-function showFoodPopup(food) {
-    const popup = document.getElementById('foodPopup');
-    const popupContent = document.getElementById('popupContent');
-    
-    let content = `<h3>${food.title}</h3>`;
-    content += `<p><strong>Directions:</strong> ${food.directions}</p>`;
-    content += `<p><strong>Ingredients:</strong></p><ul>`;
-    
-    if (food['ingredients 1']) content += `<li>${food['ingredients 1']}</li>`;
-    if (food['ingredients 2']) content += `<li>${food['ingredients 2']}</li>`;
-    if (food['ingredients 3']) content += `<li>${food['ingredients 3']}</li>`;
-    
-    content += `</ul><img src="${food.img_URL}" alt="${food.title} image">`;
-
-    popupContent.innerHTML = content;
-    popup.style.display = 'block';
-
-    // Close the popup when clicking the close button
-    document.querySelector('.close-btn').onclick = () => {
-        popup.style.display = 'none';
-    };
+function showFood(foodId) {
+    getFoods().then(foodData => {
+        const selectedFood = foodData.find(food => food.id == foodId);
+        if (selectedFood) {
+            renderFoodPopup(selectedFood);
+        }
+    });
 }
 
-// Form submission handler to add a new food item
-document.getElementById('recipeForm').addEventListener('submit', function (e) {
+function renderFoodPopup(food) {
+    const popup = document.getElementById("foodPopup");
+    const popupContent = document.getElementById("popupContent");
+
+    let ingredientsList = '';
+    for (let key in food) {
+        if (key.startsWith('ingredients')) {
+            ingredientsList += `<li>${food[key]}</li>`;
+        }
+    }
+
+    popupContent.innerHTML = `
+        <img src="${food.imageUrl}" alt="Image of ${food.title}">
+        <h2>${food.title}</h2>
+        <ul>${ingredientsList}</ul>
+        <p>${food.directions}</p>
+    `;
+
+    popup.style.display = 'block';
+
+    const closeBtn = document.querySelector(".close-btn");
+    closeBtn.addEventListener("click", () => {
+        popup.style.display = "none";
+    });
+}
+
+// Form submission event
+document.getElementById('recipeForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const foodName = document.getElementById('foodName').value;
+    const recipeDirections = document.getElementById('recipeDirections').value;
+    const ingredients = document.getElementById('ingredients').value.split(',').map(ing => ing.trim());
+    const imageUrl = document.getElementById('imageUrl').value;
+
     const newFood = {
-        title: document.getElementById('foodName').value,
-        directions: document.getElementById('recipeDirections').value,
-        'ingredients 1': document.getElementById('ingredients').value.split(',')[0],
-        'ingredients 2': document.getElementById('ingredients').value.split(',')[1],
-        'ingredients 3': document.getElementById('ingredients').value.split(',')[2],
-        img_URL: document.getElementById('imageUrl').value
+        title: foodName,
+        directions: recipeDirections,
+        ingredients,
+        imageUrl
     };
 
-    fetch(baseURL, {
-        headers: {
-            'X-Master-Key': apiKey
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        const foodItems = Array.isArray(data.record) ? data.record : Object.values(data.record);
-        
-        if (Array.isArray(foodItems)) {
-            const updatedFoodItems = [...foodItems, newFood]; // Add the new item to the existing data
+    try {
+        let foodData = await getFoods();
+        foodData.push(newFood);
+        console.log('New food data:', foodData);
 
-            // Update JSONBin with the new food list
-            return fetch(baseURL, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': apiKey
-                },
-                body: JSON.stringify(updatedFoodItems)
-            });
-        } else {
-            console.error('data.record is not an array:', data.record);
-        }
-    })
-    .then(response => {
+        const response = await fetch(baseUrl, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': apiKey
+            },
+            body: JSON.stringify({ Foods: foodData })
+        });
+
         if (response.ok) {
-            return response.json();
+            alert('Recipe added successfully!');
+            document.getElementById('recipeForm').reset();
+        } else {
+            alert('Failed to add recipe.');
         }
-        throw new Error('Failed to update JSONBin.');
-    })
-    .then(() => {
-        fetchDefaultButtons(); // Refresh the displayed buttons
-        document.getElementById('recipeForm').reset(); // Clear the form
-    })
-    .catch(error => console.error('Error adding new food:', error));
+    } catch (error) {
+        alert('Error occurred while submitting the form.');
+    }
 });

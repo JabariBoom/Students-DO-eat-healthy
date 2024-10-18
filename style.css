@@ -74,17 +74,6 @@
     margin: 0 auto 20px;
 }
 
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 10px;
-    background: #edeef0;
-    border-radius: 30px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
 button {
     flex: 1 1 45%;
     border: none;

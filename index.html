@@ -15,16 +15,15 @@
                 <input type="text" id="foodSearch" placeholder="Search...">
                 <button id="searchBtn">🔍</button>
             </div>
+
             <div class="row">
-                <ul id="foodList"></ul> <!-- Dynamic food list will be appended here -->
+                <button onclick="showFood(1)">Yogurt</button>
+                <button onclick="showFood(2)">Smoothie</button>
+                <button onclick="showFood(3)">Masala</button>
+                <button onclick="showFood(4)">Cheese</button>
+                <button onclick="showFood(5)">Tomato and Pepper</button>
             </div>
         </div>
-
-        <!-- Default Buttons will be appended here dynamically using JS -->
-        <div id="default-buttons" class="food-buttons">
-            <!-- Buttons will be fetched and displayed here -->
-        </div>
-
         <div class="search-bar-form">
             <h2>Share one of your favourite recipes!</h2>
             <form id="recipeForm">
@@ -36,8 +35,6 @@
             </form>
         </div>
     </div>
-
-    <!-- Food Popup -->
     <div id="foodPopup" class="popup">
         <div class="popup-content">
             <span class="close-btn">&times;</span>
@@ -45,6 +42,6 @@
         </div>
     </div>
 
-    <script type="module" src="./index.js"></script>
+    <script type="module" src="index.js"></script>
 </body>
 </html>
