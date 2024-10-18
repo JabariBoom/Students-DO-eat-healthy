@@ -32,6 +32,7 @@ function showFood(foodId) {
         }
     });
 }
+showFood();
 
 function renderFoodPopup(food) {
     const popup = document.getElementById("foodPopup");
