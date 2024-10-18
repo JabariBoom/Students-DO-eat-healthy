@@ -1,106 +1,101 @@
 const baseURL = 'https://api.jsonbin.io/v3/b/67119cc6acd3cb34a898ce96';
 const apiKey = '$2a$10$munKfk5utPlie.KDveDg8.hr8po9RE79des8B3bwSSefKXTA052ai';
 
-// Get references to form elements and the list where foods will be displayed
-const foodForm = document.getElementById('recipeForm');
-const foodNameInput = document.getElementById('foodName');
-const recipeDirectionsInput = document.getElementById('recipeDirections');
-const ingredientsInput = document.getElementById('ingredients');
-const imageUrlInput = document.getElementById('imageUrl');
-const foodSearch = document.getElementById('foodSearch');
-const foodPopup = document.getElementById('foodPopup');
-const popupContent = document.getElementById('popupContent');
-const closeBtn = document.querySelector('.close-btn');
+document.addEventListener("DOMContentLoaded", () => {
+    fetchDefaultButtons();
+});
 
-// Function to fetch food items from JSONBin
-function fetchFoods() {
+// Fetch default buttons from JSON and display them
+function fetchDefaultButtons() {
     fetch(baseURL, {
-        method: 'GET',
         headers: {
             'X-Master-Key': apiKey
         }
     })
     .then(response => response.json())
     .then(data => {
-        displayFoods(data.record);
+        const foodItems = data.record;
+        displayFoodButtons(foodItems);
     })
-    .catch(error => console.error('Error fetching food items:', error));
+    .catch(error => console.error('Error fetching data:', error));
 }
 
-// Function to display food items in the list
-function displayFoods(foods) {
-    const foodList = document.getElementById('foodList');
-    foodList.innerHTML = '';
-    foods.forEach(food => {
-        const foodItem = document.createElement('li');
-        foodItem.textContent = `${food.name} - ${food.type} - $${food.price} - ${food.description}`;
-        foodItem.addEventListener('click', function () {
-            showFoodPopup(food);
-        });
-        foodList.appendChild(foodItem);
+// Display food buttons dynamically
+function displayFoodButtons(foodItems) {
+    const defaultButtonsDiv = document.getElementById('default-buttons');
+    defaultButtonsDiv.innerHTML = ''; // Clear existing buttons
+
+    foodItems.forEach(food => {
+        const button = document.createElement('button');
+        button.textContent = food.title;
+        button.onclick = () => showFoodPopup(food);
+        defaultButtonsDiv.appendChild(button);
     });
 }
 
-// Function to display the popup with food details
+// Show popup with food details
 function showFoodPopup(food) {
-    popupContent.innerHTML = `
-        <h2>${food.name}</h2>
-        <p>Type: ${food.type}</p>
-        <p>Price: $${food.price}</p>
-        <p>Description: ${food.description}</p>
-        ${food.imageUrl ? `<img src="${food.imageUrl}" alt="${food.name}" />` : ''}
-    `;
-    foodPopup.classList.add('show');
+    const popup = document.getElementById('foodPopup');
+    const popupContent = document.getElementById('popupContent');
+    
+    let content = `<h3>${food.title}</h3>`;
+    content += `<p><strong>Directions:</strong> ${food.directions}</p>`;
+    content += `<p><strong>Ingredients:</strong></p><ul>`;
+    
+    Object.keys(food).forEach(key => {
+        if (key.startsWith('ingredients')) {
+            content += `<li>${food[key]}</li>`;
+        }
+    });
+
+    content += `</ul><img src="${food.img_URL}" alt="${food.title} image">`;
+
+    popupContent.innerHTML = content;
+    popup.style.display = 'block';
+
+    // Close the popup when clicking the close button
+    document.querySelector('.close-btn').onclick = () => {
+        popup.style.display = 'none';
+    };
 }
 
-// Close the popup when the close button is clicked
-closeBtn.addEventListener('click', function () {
-    foodPopup.classList.remove('show');
-});
-
-// Handle form submission
-foodForm.addEventListener('submit', function (e) {
+// Form submission handler to add a new food item
+document.getElementById('recipeForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    const newRecipe = {
-        name: foodNameInput.value,
-        directions: recipeDirectionsInput.value,
-        ingredients: ingredientsInput.value.split(','),
-        imageUrl: imageUrlInput.value
+    const newFood = {
+        title: document.getElementById('foodName').value,
+        directions: document.getElementById('recipeDirections').value,
+        'ingredients 1': document.getElementById('ingredients').value.split(',')[0],
+        'ingredients 2': document.getElementById('ingredients').value.split(',')[1],
+        'ingredients 3': document.getElementById('ingredients').value.split(',')[2],
+        img_URL: document.getElementById('imageUrl').value
     };
 
     fetch(baseURL, {
-        method: 'PATCH',
         headers: {
-            'X-Master-Key': apiKey,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            record: [...newRecipe]
-        })
+            'X-Master-Key': apiKey
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const updatedFoodItems = [...data.record, newFood]; // Add new item to the existing data
+        
+        // Update JSONBin with the new food list
+        return fetch(baseURL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': apiKey
+            },
+            body: JSON.stringify(updatedFoodItems)
+        });
     })
     .then(response => response.json())
     .then(() => {
-        fetchFoods();
-        foodForm.reset();  // Reset the form after submission
+        // Update the displayed buttons with the new food item
+        fetchDefaultButtons();
+        document.getElementById('recipeForm').reset();
     })
-    .catch(error => console.error('Error submitting food item:', error));
+    .catch(error => console.error('Error adding new food:', error));
 });
-
-// Search functionality for food items
-foodSearch.addEventListener('input', function () {
-    const searchTerm = foodSearch.value.toLowerCase();
-    const foodItems = document.getElementById('foodList').getElementsByTagName('li');
-
-    Array.from(foodItems).forEach(item => {
-        const foodText = item.textContent.toLowerCase();
-        if (foodText.includes(searchTerm)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-});
-
-// Initialize food list on page load
-fetchFoods();
