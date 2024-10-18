@@ -45,6 +45,7 @@ function renderFoodPopup(food) {
             ingredientsList += `<li>${food[key]}</li>`;
         }
     }
+
     popupContent.innerHTML = `
         <img src="${food.imageUrl}" alt="Image of ${food.title}">
         <h2>${food.title}</h2>
@@ -59,6 +60,38 @@ function renderFoodPopup(food) {
         popup.style.display = "none";
     });
 }
+
+window.deleteFood = async function(foodId) {
+    try {
+        const foodIndex = foodData.findIndex(food => food.id == foodId);
+        if (foodIndex !== -1) {
+            foodData.splice(foodIndex, 1);
+
+            const response = await fetch(baseUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': apiKey
+                },
+                body: JSON.stringify({ Foods: foodData })
+            });
+            if (response.ok) {
+                alert('Recipe deleted successfully!');
+                // Remove the corresponding button from the UI
+                const buttonToRemove = document.querySelector(`button[data-id='${foodId}']`);
+                if (buttonToRemove) {
+                    buttonToRemove.remove();
+                }
+            } else {
+                alert('Failed to delete the recipe.');
+            }
+        } else {
+            alert('Recipe not found.');
+        }
+    } catch (error) {
+        alert('Error occurred while deleting the recipe.');
+    }
+};
 
 document.getElementById('recipeForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -86,14 +119,14 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
             },
             body: JSON.stringify({ Foods: foodData })
         });
-
         if (response.ok) {
             alert('Recipe added successfully!');
             document.getElementById('recipeForm').reset();
             const buttonRow = document.querySelector('.search-bar .row');
             const newButton = document.createElement('button');
-            newButton.innerHTML = foodName;
-            newButton.setAttribute('onclick', `showFood(${newFood.id})`);
+            newButton.innerHTML = `${foodName} <button class="delete-btn" onclick="deleteFood(${newFood.id})">X</button>`;
+            newButton.setAttribute('data-id', newFood.id);
+            newButton.setAttribute('onclick', `showFood(${newFood.id})`); // Use the newFood ID
             buttonRow.appendChild(newButton);
         } else {
             alert('Failed to add recipe.');
@@ -102,4 +135,3 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
         alert('Error occurred while submitting the form.');
     }
 });
-
