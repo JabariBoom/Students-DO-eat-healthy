@@ -23,6 +23,11 @@ function fetchDefaultButtons() {
 // Display food buttons dynamically
 function displayFoodButtons(foodItems) {
     const defaultButtonsDiv = document.getElementById('default-buttons');
+    if (!defaultButtonsDiv) {
+        console.error('Error: default-buttons element not found');
+        return;
+    }
+    
     defaultButtonsDiv.innerHTML = ''; // Clear existing buttons
 
     foodItems.forEach(food => {
@@ -37,6 +42,11 @@ function displayFoodButtons(foodItems) {
 function showFoodPopup(food) {
     const popup = document.getElementById('foodPopup');
     const popupContent = document.getElementById('popupContent');
+    
+    if (!popup || !popupContent) {
+        console.error('Error: Popup or popupContent element not found');
+        return;
+    }
     
     let content = `<h3>${food.title}</h3>`;
     content += `<p><strong>Directions:</strong> ${food.directions}</p>`;
