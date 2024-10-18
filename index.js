@@ -1,5 +1,5 @@
-const baseUrl = 'https://api.jsonbin.io/v3/b/67111d1facd3cb34a8989ec4';
-const apiKey = '$2a$10$9f5zLXyC4FCiT8KwPMy83O0Jh3FnfU6Q4Pe8D.knlVqFCqqBx3ca2';
+const baseURL = 'https://api.jsonbin.io/v3/b/67119cc6acd3cb34a898ce96';
+const apiKey = '$2a$10$munKfk5utPlie.KDveDg8.hr8po9RE79des8B3bwSSefKXTA052ai';
 
 function getFoods() {
     return fetch(baseUrl, {
