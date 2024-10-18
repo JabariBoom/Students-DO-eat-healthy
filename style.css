@@ -89,7 +89,10 @@ button {
     display: block;
 }
 
-/* Style for newly added buttons */
+button:hover {
+    background: #c49706;
+}
+
 .recipe-button {
     flex: 1 1 45%;
     border: none;
@@ -103,6 +106,10 @@ button {
     margin: 10px;
     position: relative;
     display: block;
+}
+
+.recipe-button:hover {
+    background: #c49706;
 }
 
 .recipe-button .delete-btn {
@@ -126,10 +133,6 @@ button {
 
 .recipe-button .delete-btn:hover {
     background-color: #800a0a;
-}
-
-button:hover {
-    background: #c49706;
 }
 
 .search-bar-form {

@@ -37,7 +37,6 @@ window.showFood = function(foodId) {
 function renderFoodPopup(food) {
     const popup = document.getElementById("foodPopup");
     const popupContent = document.getElementById("popupContent");
-
     let ingredientsList = '';
     for (let key in food) {
         if (key.startsWith('ingredients')) {
@@ -62,24 +61,28 @@ window.deleteFood = function(foodId) {
         const foodIndex = foodData.findIndex(food => food.id == foodId);
         if (foodIndex !== -1) {
             foodData.splice(foodIndex, 1);
-
-            const response = fetch(baseUrl, {
+            fetch(baseUrl, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Master-Key': apiKey
                 },
                 body: JSON.stringify({ Foods: foodData })
-            });
-            if (response.ok) {
-                alert('Recipe deleted successfully!');
-                const buttonToRemove = document.querySelector(`button[data-id='${foodId}']`);
-                if (buttonToRemove) {
-                    buttonToRemove.remove();
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Recipe deleted successfully!');
+                    const buttonToRemove = document.querySelector(`button[data-id='${foodId}']`);
+                    if (buttonToRemove) {
+                        buttonToRemove.remove();
+                    }
+                } else {
+                    alert('Failed to delete the recipe.');
                 }
-            } else {
-                alert('Failed to delete the recipe.');
-            }
+            })
+            .catch(() => {
+                alert('Error occurred while deleting the recipe.');
+            });
         } else {
             alert('Recipe not found.');
         }
@@ -115,9 +118,17 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
             document.getElementById('recipeForm').reset();
             const buttonRow = document.querySelector('.search-bar .row');
             const newButton = document.createElement('button');
-            newButton.innerHTML = `${foodName} <button class="delete-btn" onclick="deleteFood('${newFood.id}')">X</button>`;
+            newButton.innerHTML = `${foodName}`;
             newButton.setAttribute('data-id', newFood.id);
             newButton.setAttribute('onclick', `showFood(${newFood.id})`);
+            newButton.classList.add('food-button'); 
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = 'X';
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.setAttribute('onclick', `deleteFood(${newFood.id})`);
+
+            newButton.appendChild(deleteBtn);
+
             buttonRow.appendChild(newButton);
         } else {
             alert('Failed to add recipe.');
@@ -130,7 +141,7 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
 document.getElementById('searchBtn').addEventListener('click', function() {
     const searchQuery = document.getElementById('foodSearch').value.toLowerCase();
     const buttons = document.querySelectorAll('.row button');
-    
+
     buttons.forEach(button => {
         const buttonText = button.textContent.toLowerCase();
         if (!buttonText.includes(searchQuery)) {
