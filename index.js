@@ -24,15 +24,16 @@ function getFoods() {
     });
 }
 
-function showFood(foodId) {
+window.showFood = function(foodId) {
     getFoods().then(foodData => {
         const selectedFood = foodData.find(food => food.id == foodId);
         if (selectedFood) {
             renderFoodPopup(selectedFood);
+        } else {
+            alert("Food not found!");
         }
     });
-}
-showFood();
+};
 
 function renderFoodPopup(food) {
     const popup = document.getElementById("foodPopup");
@@ -44,7 +45,6 @@ function renderFoodPopup(food) {
             ingredientsList += `<li>${food[key]}</li>`;
         }
     }
-
     popupContent.innerHTML = `
         <img src="${food.imageUrl}" alt="Image of ${food.title}">
         <h2>${food.title}</h2>
@@ -60,22 +60,19 @@ function renderFoodPopup(food) {
     });
 }
 
-// Form submission event
 document.getElementById('recipeForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const foodName = document.getElementById('foodName').value;
     const recipeDirections = document.getElementById('recipeDirections').value;
     const ingredients = document.getElementById('ingredients').value.split(',').map(ing => ing.trim());
     const imageUrl = document.getElementById('imageUrl').value;
-
     const newFood = {
+        id: new Date().getTime().toString(),
         title: foodName,
         directions: recipeDirections,
         ingredients,
         imageUrl
     };
-
     try {
         let foodData = await getFoods();
         foodData.push(newFood);
@@ -93,6 +90,11 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
         if (response.ok) {
             alert('Recipe added successfully!');
             document.getElementById('recipeForm').reset();
+            const buttonRow = document.querySelector('.search-bar .row');
+            const newButton = document.createElement('button');
+            newButton.innerHTML = foodName;
+            newButton.setAttribute('onclick', `showFood(${newFood.id})`);
+            buttonRow.appendChild(newButton);
         } else {
             alert('Failed to add recipe.');
         }
@@ -100,3 +102,4 @@ document.getElementById('recipeForm').addEventListener('submit', async (e) => {
         alert('Error occurred while submitting the form.');
     }
 });
+
